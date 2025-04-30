@@ -5,7 +5,6 @@ import br.unipar.programacaoweb.library.repository.LivroRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class LivroService {
@@ -16,16 +15,16 @@ public class LivroService {
         this.livroRepository = livroRepository;
     }
 
-    public void salvar(Livro livro){
-        livroRepository.save(livro);
+    public Livro salvar(Livro livro){
+        return livroRepository.save(livro);
     }
 
     public void excluir(Long id){
         livroRepository.deleteById(id);
     }
 
-    public void BuscarPorId(Long id){
-        livroRepository.findById(id).orElse(null);
+    public Livro BuscarPorId(Long id){
+       return livroRepository.findById(id).orElse(null);
     }
 
     public List<Livro> buscarPorTitulo(String titulo) {
