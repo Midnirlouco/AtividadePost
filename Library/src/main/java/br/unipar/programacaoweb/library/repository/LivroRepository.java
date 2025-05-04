@@ -11,11 +11,14 @@ import java.util.List;
 @Repository
 public interface LivroRepository extends JpaRepository<Livro, Long> {
 
-    List<Livro> findByTituloContaining(String titulo);
-
     List<Livro> findByGeneroContainingIgnoreCase(String genero);
 
-    @Query("SELECT t FROM Livro WHERE t.titulo = :genero AND t.numeroPaginas >= :numeroPaginas")
-    List<Livro> findByTituloeNumeroPaginas(@Param("genero") String genero,
-                                           @Param("numeroPaginas") Integer numeroPaginas);
+    List<Livro> findByTituloContainingIgnoreCase(String titulo);
+
+    @Query("SELECT l FROM Livro l WHERE LOWER(l.genero) = LOWER(:genero) AND l.numeroPaginas >= :numeroPaginas")
+    List<Livro> findByGeneroAndNumeroPaginasGreaterThanEqual(
+            @Param("genero") String genero,
+            @Param("numeroPaginas") Integer numeroPaginas
+    );
+
 }

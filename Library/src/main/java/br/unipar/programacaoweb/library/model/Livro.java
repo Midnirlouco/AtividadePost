@@ -1,5 +1,6 @@
 package br.unipar.programacaoweb.library.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,6 +21,8 @@ public class Livro {
     private String genero;
 
     @ManyToOne
+    @JoinColumn(name = "autor_id")
+    @JsonBackReference
     private Autor autor;
 
 }

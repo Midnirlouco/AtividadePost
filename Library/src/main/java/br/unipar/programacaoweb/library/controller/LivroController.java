@@ -2,81 +2,98 @@ package br.unipar.programacaoweb.library.controller;
 
 import br.unipar.programacaoweb.library.model.Livro;
 import br.unipar.programacaoweb.library.service.LivroService;
-import org.apache.coyote.Response;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@GetMapping("/Livro")
+@RequestMapping("/livros")
 public class LivroController {
 
-    private LivroService livroService;
+    private final LivroService livroService;
 
-
-    public LivroController(LivroService livroService){
+    public LivroController(LivroService livroService) {
         this.livroService = livroService;
     }
 
-    @GetMapping("/Listar")
-    public ResponseEntity<List<Livro>> listarlivros() {
-        List<Livro> livros = livroService.listaTodos();
-        if (livros.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-
-        return ResponseEntity.ok(livros);
+    @GetMapping("/listar")
+    public ResponseEntity<List<Livro>> listarLivros() {
+        List<Livro> lista = livroService.listaTodos();
+        return lista.isEmpty()
+                ? ResponseEntity.noContent().build()
+                : ResponseEntity.ok(lista);
     }
 
     @GetMapping("/buscar/{id}")
-    public ResponseEntity<Livro> buscarLivroPorID(@PathVariable Long id){
-        Livro livro = LivroService.BuscarPorId(id);
-        if (livro == null) {
+    public ResponseEntity<Livro> buscarPorId(@PathVariable Long id) {
+        Livro livro = livroService.buscarPorId(id);
+        return livro == null
+                ? ResponseEntity.notFound().build()
+                : ResponseEntity.ok(livro);
+    }
+
+    @GetMapping("/buscar/por-titulo")
+    public ResponseEntity<List<Livro>> buscarPorTitulo(
+            @RequestParam String titulo
+    ) {
+        List<Livro> lista = livroService.buscarPorTitulo(titulo);
+        return lista.isEmpty()
+                ? ResponseEntity.noContent().build()
+                : ResponseEntity.ok(lista);
+    }
+
+    @GetMapping("/buscar/por-genero")
+    public ResponseEntity<List<Livro>> buscarPorGenero(
+            @RequestParam String genero
+    ) {
+        List<Livro> lista = livroService.buscarPorGenero(genero);
+        return lista.isEmpty()
+                ? ResponseEntity.noContent().build()
+                : ResponseEntity.ok(lista);
+    }
+
+    @GetMapping("/buscar/por-genero-paginas")
+    public ResponseEntity<List<Livro>> buscarPorGeneroENumeroPaginas(
+            @RequestParam String genero,
+            @RequestParam Integer paginasMinimas
+    ) {
+        List<Livro> lista = livroService.buscarPorGeneroENumeroPaginas(genero, paginasMinimas);
+        return lista.isEmpty()
+                ? ResponseEntity.noContent().build()
+                : ResponseEntity.ok(lista);
+    }
+
+    @PostMapping("/salvar")
+    public ResponseEntity<Livro> salvarLivro(@RequestBody Livro livro) {
+        Livro criado = livroService.salvar(livro);
+        return ResponseEntity.status(201).body(criado);
+    }
+
+    @PutMapping("/editar/{id}")
+    public ResponseEntity<Livro> editarLivro(
+            @PathVariable Long id,
+            @RequestBody Livro dados
+    ) {
+        Livro existente = livroService.buscarPorId(id);
+        if (existente == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(livro);
-    }
-
-  @GetMapping("/buscar/titulo/{titulo}")
-    public ResponseEntity<List<Livro>> buscarLivrosPorTitulo(@PathVariable String titulo) {
-        List<Livro> livros = livroService.buscarPorTitulo(titulo);
-        if(livros.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.ok(livros);
-    }
-
-    @PostMapping("/Salvar")
-    public ResponseEntity<Livro> salvarLivro(@RequestBody Livro livro) {
-        Livro livroSalvo = livroService.salvar(livro);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(livroSalvo);
+        existente.setTitulo(dados.getTitulo());
+        existente.setNumeroPaginas(dados.getNumeroPaginas());
+        existente.setGenero(dados.getGenero());
+        existente.setAutor(dados.getAutor());
+        Livro atualizado = livroService.salvar(existente);
+        return ResponseEntity.ok(atualizado);
     }
 
     @DeleteMapping("/excluir/{id}")
-    public ResponseEntity<Void> excluirLivro(@PathVariable long id){
-        Livro livro = livroService.BuscarPorId(id);
-        if(livro == null) {
+    public ResponseEntity<Void> excluirLivro(@PathVariable Long id) {
+        Livro existente = livroService.buscarPorId(id);
+        if (existente == null) {
             return ResponseEntity.notFound().build();
         }
         livroService.excluir(id);
-
         return ResponseEntity.noContent().build();
-    }
-
-    @PutMapping("editar/{id}")
-    public ResponseEntity<Livro> editarLivro(@PathVariable Long id, @RequestBody Livro livro) {
-        Livro livroAtual = livroService.BuscarPorId(id);
-        if(livroAtual == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        livroAtual.setTitulo(livro.getTitulo());
-        livroAtual.setNumeroPaginas(livro.getNumeroPaginas());
-        livroAtual.setGenero(livro.getGenero());
-
-        return ResponseEntity.ok(livroService.salvar(livroAtual));
     }
 }

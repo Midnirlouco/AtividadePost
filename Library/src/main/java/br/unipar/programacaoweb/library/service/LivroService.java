@@ -15,25 +15,31 @@ public class LivroService {
         this.livroRepository = livroRepository;
     }
 
-    public Livro salvar(Livro livro){
+    public Livro salvar(Livro livro) {
         return livroRepository.save(livro);
     }
 
-    public void excluir(Long id){
+    public void excluir(Long id) {
         livroRepository.deleteById(id);
     }
 
-    public Livro BuscarPorId(Long id){
-       return livroRepository.findById(id).orElse(null);
-    }
-
-    public List<Livro> buscarPorTitulo(String titulo) {
-        return livroRepository.findAll().stream()
-                .filter(livro -> livro.getTitulo().equalsIgnoreCase(titulo))
-                .toList();
+    public Livro buscarPorId(Long id) {
+        return livroRepository.findById(id).orElse(null);
     }
 
     public List<Livro> listaTodos() {
         return livroRepository.findAll();
+    }
+
+    public List<Livro> buscarPorTitulo(String titulo) {
+        return livroRepository.findByTituloContainingIgnoreCase(titulo);
+    }
+
+    public List<Livro> buscarPorGenero(String genero) {
+        return livroRepository.findByGeneroContainingIgnoreCase(genero);
+    }
+
+    public List<Livro> buscarPorGeneroENumeroPaginas(String genero, Integer paginasMinimas) {
+        return livroRepository.findByGeneroAndNumeroPaginasGreaterThanEqual(genero, paginasMinimas);
     }
 }
